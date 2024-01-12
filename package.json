@@ -3,10 +3,10 @@
   "type":"module",
   "version": "1.0.0",
   "description": "",
-  "main": "bardbot.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon bardbot.js"
+    "start": "nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",

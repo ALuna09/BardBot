@@ -1,14 +1,13 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
 
-// const dice = ["d4", "d6", "d8", "d10", "d12", "d20", "%"];
-const diceRoll = (num) => {
-  if(num === '%')  return `You rolled a(n) ${Math.floor(Math.random() * 10)}0%.`;
+const diceRoll = (num) => { // Dice rolling helper function
+  if(num === '%')  return `You rolled a(n) ${Math.floor(Math.random() * 10)}0.`;
 
   return `You rolled a(n) ${Math.floor(Math.random() * num) + 1}.`;
 };
 
-const client = new Client({
+const client = new Client({ // Create the actual bot with desired access(intents)
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -21,9 +20,9 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on("messageCreate", (message) => {
+client.on("messageCreate", (message) => { // Message detector + response
   if (message.content.startsWith("!roll")) {
-    message.reply("rolling");
+    message.reply(`Rolling!`);
     const dieOfChoice = message.content.split(' ')[1];
     switch (dieOfChoice) {
       case "d4":
@@ -47,11 +46,14 @@ client.on("messageCreate", (message) => {
       case "%":
         message.channel.send(diceRoll('%'));
         break;
+      case "help":
+        message.reply(`Valid commands:\nd4, d6, d8, d10, d12, d20, %`);
+        break;
       default:
-        message.channel.send("Not a valid die");
+        message.channel.send(`Not a valid die.\nIf you need a list of valid commands type "help" after the "!roll" trigger.👌`);
         break;
     }
   } 
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN); // Bot login

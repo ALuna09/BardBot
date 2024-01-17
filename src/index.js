@@ -30,31 +30,34 @@ client.on('ready', (ready) => {
 
 client.on("messageCreate", (message) => { // Message detector + response
   if (message.content.startsWith("!roll")) { // Handle rolls
-    message.reply(`Rolling!`);
+    let rollTheDice = (die) => {
+      message.reply(`Rolling!`);
+      message.channel.send(diceRoll(die));
+    }
 
     const dieOfChoice = message.content.split(' ')[1];
 
     switch (dieOfChoice) {
       case "d4":
-        message.channel.send(diceRoll(4));
+        rollTheDice(4);
         break;
       case "d6":
-        message.channel.send(diceRoll(6));
+        rollTheDice(6);
         break;
       case "d8":
-        message.channel.send(diceRoll(8));
+        rollTheDice(8);
         break;
       case "d10":
-        message.channel.send(diceRoll(10));
+        rollTheDice(10);
         break;
       case "d12":
-        message.channel.send(diceRoll(12));
+        rollTheDice(12);
         break;
       case "d20":
-        message.channel.send(diceRoll(20));
+        rollTheDice(20);
         break;
       case "%":
-        message.channel.send(diceRoll('%'));
+        rollTheDice('%');
         break;
       case "help":
         message.reply(`Valid commands:\nd4, d6, d8, d10, d12, d20, %`);

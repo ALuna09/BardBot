@@ -11,7 +11,7 @@ const diceRoll = (dieType) => { // Dice rolling helper function
     return  `You rolled ${roll === 8 ? 'an' : 'a'} ${roll}.`;
   } else {
     let roll = Math.floor(Math.random() * dieType) + 1;
-    let particle = roll === 8 || roll === 18 || roll === 11 ? 'an' : 'a';
+    let particle = roll === 8 || roll === 18 || roll === 11 ? `an` : `a`;
     return `You rolled ${particle} ${roll}.`;
   }
 };
@@ -25,11 +25,11 @@ const client = new Client({ // Create the actual bot with desired access(intents
   ] 
 });
 
-client.on('ready', (ready) => {
+client.on(`ready`, (ready) => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on("messageCreate", (message) => { // Message detector + response
+client.on(`messageCreate`, (message) => { // Message detector + response
   const triggeredCommand = message.content.split(' ')[1];
 
   if (message.content.startsWith(`!roll`)) { // Handle rolls
@@ -85,7 +85,7 @@ client.on("messageCreate", (message) => { // Message detector + response
           listedSkills.push(skillObj.index);
         }
         
-        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid skills:\n${listedSkills.join('\n')}`);
+        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid skill commands:\n${listedSkills.join('\n')}`);
       })
       .catch(err => console.error(err));
     });
@@ -98,7 +98,7 @@ client.on("messageCreate", (message) => { // Message detector + response
         relatedSkills.push(skill.name);
       }
       message.channel.send(
-        `Here's the description, and skills for ${data.name}:\n
+        `Here's the description, and relevant skills for ${data.name}:\n
         Description:\n${data.desc[0]}\n
         Skills:\n${relatedSkills.join('\n')}`
         )
@@ -115,12 +115,37 @@ client.on("messageCreate", (message) => { // Message detector + response
           abilities.push(ability.index);
         }
 
-        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid abilities:\n${abilities.join('\n')}`);
+        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid ability commands:\n${abilities.join('\n')}`);
       })
       .catch(err => console.error(err));
     })
-  } 
-});
+  } else if (message.content.startsWith(`!alignment`)) { // Handle alignment descriptions
+    fetch(`${BASE_URL}/alignments/${triggeredCommand}`)
+    .then(res => {
+      res.json()
+      if(res.status === 404) throw new Error('Something went wrong'); // Force going to catch statement if 404
+    })
+    .then(data => {
+      message.channel.send(`Here's the description for ${data.name}:\n${data.desc}`)
+    })
+    .catch(err => {
+      console.error(err);
 
+      fetch(`${BASE_URL}/alignments`)
+      .then(res => res.json())
+      .then(data => {
+        let alignments = [];
+  
+        for(let alignment of data.results) {
+          alignments.push(alignment.index);
+        }
+
+        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid alignment commands:\n${alignments.join('\n')}`)
+      })
+      .catch(err => console.error(err));
+
+    })
+  }
+});
 
 client.login(process.env.BOT_TOKEN); // Bot login

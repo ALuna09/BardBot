@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
 
+const {BASE_URL} = process.env;
 const diceRoll = (dieType) => { // Dice rolling helper function
   if(dieType === '%') {
     let roll = Math.floor(Math.random() * 10);
@@ -29,15 +30,15 @@ client.on('ready', (ready) => {
 });
 
 client.on("messageCreate", (message) => { // Message detector + response
-  if (message.content.startsWith("!roll")) { // Handle rolls
+  const triggeredCommand = message.content.split(' ')[1];
+
+  if (message.content.startsWith(`!roll`)) { // Handle rolls
     let rollTheDice = (die) => {
       message.reply(`Rolling!`);
       message.channel.send(diceRoll(die));
     }
 
-    const dieOfChoice = message.content.split(' ')[1];
-
-    switch (dieOfChoice) {
+    switch (triggeredCommand) {
       case "d4":
         rollTheDice(4);
         break;
@@ -67,17 +68,15 @@ client.on("messageCreate", (message) => { // Message detector + response
         break;
     }
   } else if (message.content.startsWith(`!skill`)) { // Handle skill descriptions
-    const queriedSkill = message.content.split(' ')[1];
-    
-    fetch(`${process.env.BASE_URL}/skills/${queriedSkill}`)
+    fetch(`${BASE_URL}/skills/${triggeredCommand}`)
     .then(res => res.json())
     .then(data => {
-      message.channel.send(`Here's the description for ${queriedSkill}:\n${data.desc[0]}`);
+      message.channel.send(`Here's the description for ${data.name}:\n${data.desc[0]}`);
     })
     .catch(err => {
       console.error(err)
       
-      fetch(`${process.env.BASE_URL}/skills`) // Nested fetch to get all the valid skills
+      fetch(`${BASE_URL}/skills`) // Nested fetch to get all the valid skills
       .then(res => res.json())
       .then(data => {
         let listedSkills = [];
@@ -86,10 +85,41 @@ client.on("messageCreate", (message) => { // Message detector + response
           listedSkills.push(skillObj.index);
         }
         
-        message.channel.send(`Seems we couldn't find anything for "${queriedSkill}"\nHere are the valid skills:\n${listedSkills.join('\n')}`);
-      });
+        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid skills:\n${listedSkills.join('\n')}`);
+      })
+      .catch(err => console.error(err));
     });
-  } //else if ()
+  } else if (message.content.startsWith(`!ability`)) { // Handle ability descriptions
+    fetch(`${BASE_URL}/ability-scores/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      let relatedSkills = []
+      for(let skill of data.skills) { // Populate related skills arr
+        relatedSkills.push(skill.name);
+      }
+      message.channel.send(
+        `Here's the description, and skills for ${data.name}:\n
+        Description:\n${data.desc[0]}\n
+        Skills:\n${relatedSkills.join('\n')}`
+        )
+    })
+    .catch(err => {
+      console.error(err);
+
+      fetch(`${BASE_URL}/ability-scores`)
+      .then(res => res.json())
+      .then(data => {
+        let abilities = [];
+
+        for(let ability of data.results) {
+          abilities.push(ability.index);
+        }
+
+        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid abilities:\n${abilities.join('\n')}`);
+      })
+      .catch(err => console.error(err));
+    })
+  } 
 });
 
 

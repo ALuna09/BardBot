@@ -145,6 +145,17 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       .catch(err => console.error(err));
 
     })
+  } else if (message.content.startsWith(`!languages`)) { // Handle query for languages
+    fetch(`${BASE_URL}/languages`)
+    .then(res => res.json())
+    .then(data => {
+      let languages = [];
+      for(let language of data.results) {
+        languages.push(language.name);
+      }
+      message.channel.send(`Here's a list of existing languages:\n${languages.join('\n')}`);
+    })
+    .catch(err => console.error(err))
   }
 });
 

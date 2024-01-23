@@ -150,12 +150,67 @@ client.on(`messageCreate`, (message) => { // Message detector + response
     .then(res => res.json())
     .then(data => {
       let languages = [];
+
       for(let language of data.results) {
         languages.push(language.name);
       }
+
       message.channel.send(`Here's a list of existing languages:\n${languages.join('\n')}`);
     })
     .catch(err => console.error(err))
+  } else if (message.content.startsWith(`!classes`)) { // Handle character class datails
+    fetch(`${BASE_URL}/classes/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      // console.log('Proficiancies:', data.proficiencies);
+      let listedProficiencies = [];
+
+      for(let proficiency of data.proficiencies) {
+        listedProficiencies.push(proficiency.name);
+      }
+      listedProficiencies.pop();
+      listedProficiencies.pop();
+
+      let startingEquipment = [];
+
+      for(let equip of data.starting_equipment) {
+        startingEquipment.push(equip.equipment.name);
+      }
+
+      let bardCase = triggeredCommand === 'bard';
+      if(bardCase) {
+        data.proficiency_choices[0].desc = `Choose any three from all skills`
+        // Acrobatics, Animal, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight, Stealth, and Survival
+      }
+
+      message.channel.send(
+        `***${data.name}*** 
+**Hit Dice**:\n  1d${data.hit_die} per level.
+**Proficiency Choices**:\n  ${data.proficiency_choices.map(e => e.desc).join(`\n  `)}.
+**Included proficiencies**:\n  ${listedProficiencies.join(', ')}.
+**Saving Throws**:\n  ${data.saving_throws[0].name}, ${data.saving_throws[1].name}.
+**Starting Equipment**:\n  ${startingEquipment.join(', ')}.
+**Starting Equipment Options**:\n  ${data.starting_equipment_options[0].desc}\n  ${data.starting_equipment_options[1].desc}
+**Multiclassing**:\n  *Prerequisites*: ${data.multi_classing.prerequisites[0].ability_score.name} - ${data.multi_classing.prerequisites[0].minimum_score}
+  *Proficiencies*: ${data.multi_classing.proficiencies.map(e => e.name).join(', ')}
+**Subclasses**:\n  ${data.subclasses.map(e => e.name).join(', ')}`
+      )
+    })
+    .catch(err => {
+      console.error(err);
+
+      fetch(`${BASE_URL}/classes`)
+      .then(res => res.json())
+      .then(data => {
+        let classes = [];
+
+        for(let characterClass of data.results) {
+          classes.push(characterClass.index);
+        }
+
+        message.channel.send(`These are all the available classes:\n${classes.join('\n')}`)
+      })
+    })
   }
 });
 

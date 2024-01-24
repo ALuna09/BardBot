@@ -180,7 +180,9 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       let bardCase = triggeredCommand === 'bard';
       if(bardCase) {
         data.proficiency_choices[0].desc = `Choose any three from all skills`
-        // Acrobatics, Animal, Arcana, Athletics, Deception, History, Insight, Intimidation, Investigation, Medicine, Nature, Perception, Performance, Persuasion, Religion, Sleight, Stealth, and Survival
+        // Acrobatics, Animal, Arcana, Athletics, Deception, History, Insight, 
+        // Intimidation, Investigation, Medicine, Nature, Perception, Performance, 
+        // Persuasion, Religion, Sleight, Stealth, and Survival
       }
 
       message.channel.send(
@@ -210,6 +212,31 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
         message.channel.send(`These are all the available classes:\n${classes.join('\n')}`)
       })
+      .catch(err => console.error(err))
+    })
+  } else if (message.content.startsWith('!class-spells')) { // List class spells
+    fetch(`${BASE_URL}/classes/${triggeredCommand}/spells`)
+    .then(res => res.json())
+    .then(data => {
+      data.count = 0 ? 
+      message.channel.send(`This class has no spells to use`) :
+      message.channel.send(`**Spells**:\n${data.results.map(e => e.name).sort().join(' -- ')}`)
+    })
+    .catch(err => {
+      console.error(err);
+
+      fetch(`${BASE_URL}/classes`)
+      .then(res => res.json())
+      .then(data => {
+        let classes = [];
+
+        for(let characterClass of data.results) {
+          classes.push(characterClass.index);
+        }
+
+        message.channel.send(`These are all the available classes:\n${classes.join('\n')}`);
+      })
+      .catch(err => console.error(err));
     })
   }
 });

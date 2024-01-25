@@ -126,7 +126,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       if(res.status === 404) throw new Error('Something went wrong'); // Force going to catch statement if 404
     })
     .then(data => {
-      message.channel.send(`Here's the description for ${data.name}:\n${data.desc}`)
+      message.channel.send(`Here's the description for ${data.name}:\n${data.desc}`);
     })
     .catch(err => {
       console.error(err);
@@ -140,7 +140,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
           alignments.push(alignment.index);
         }
 
-        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid alignment commands:\n${alignments.join('\n')}`)
+        message.channel.send(`Seems we couldn't find anything for "${triggeredCommand}"\nHere are the valid alignment commands:\n${alignments.join('\n')}`);
       })
       .catch(err => console.error(err));
 
@@ -162,7 +162,6 @@ client.on(`messageCreate`, (message) => { // Message detector + response
     fetch(`${BASE_URL}/classes/${triggeredCommand}`)
     .then(res => res.json())
     .then(data => {
-      // console.log('Proficiancies:', data.proficiencies);
       let listedProficiencies = [];
 
       for(let proficiency of data.proficiencies) {
@@ -179,7 +178,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       let bardCase = triggeredCommand === 'bard';
       if(bardCase) {
-        data.proficiency_choices[0].desc = `Choose any three from all skills`
+        data.proficiency_choices[0].desc = `Choose any three from all skills`;
         // Acrobatics, Animal, Arcana, Athletics, Deception, History, Insight, 
         // Intimidation, Investigation, Medicine, Nature, Perception, Performance, 
         // Persuasion, Religion, Sleight, Stealth, and Survival
@@ -196,7 +195,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 **Multiclassing**:\n  *Prerequisites*: ${data.multi_classing.prerequisites[0].ability_score.name} - ${data.multi_classing.prerequisites[0].minimum_score}
   *Proficiencies*: ${data.multi_classing.proficiencies.map(e => e.name).join(', ')}
 **Subclasses**:\n  ${data.subclasses.map(e => e.name).join(', ')}`
-      )
+      );
     })
     .catch(err => {
       console.error(err);
@@ -220,23 +219,23 @@ client.on(`messageCreate`, (message) => { // Message detector + response
     .then(data => {
       data.count = 0 ? 
       message.channel.send(`This class has no spells to use`) :
-      message.channel.send(`**Spells**:\n${data.results.map(e => e.name).sort().join(' -- ')}`)
+      message.channel.send(`**Spells**:\n${data.results.map(e => e.name).sort().join(' -- ')}`);
     })
     .catch(err => {
       console.error(err);
 
-      fetch(`${BASE_URL}/classes`)
-      .then(res => res.json())
-      .then(data => {
-        let classes = [];
+      message.channel.send(`Commands are the same as classes`);
+    })
+  } else if (message.content.startsWith(`!class-feats`)) { // List class features
+    fetch(`${BASE_URL}/classes/${triggeredCommand}/features`)
+    .then(res => res.json())
+    .then(data => {
+      message.channel.send(`**Features**:\n${data.results.map(e => e.name).sort().join(` -- `)}`);
+    })
+    .catch(err => {
+      console.error(err);
 
-        for(let characterClass of data.results) {
-          classes.push(characterClass.index);
-        }
-
-        message.channel.send(`These are all the available classes:\n${classes.join('\n')}`);
-      })
-      .catch(err => console.error(err));
+      message.channel.send(`Commands are the same as classes`);
     })
   }
 });

@@ -237,6 +237,17 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       message.channel.send(`Commands are the same as classes`);
     })
+  } else if (message.content.startsWith(`!class-proficiencies`)) { // List class proficiencies
+    fetch(`${BASE_URL}/classes/${triggeredCommand}/proficiencies`)
+    .then(res => res.json())
+    .then(data => {
+      message.channel.send(`**Proficiencies**:\n${data.results.map(e => e.name).join(`\n`)}`)
+    })
+    .catch(err => {
+      console.error(err);
+
+      message.channel.send(`Commands are the same as classes`);
+    })
   }
 });
 

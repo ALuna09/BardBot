@@ -248,6 +248,23 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       message.channel.send(`Commands are the same as classes`);
     })
+  } else if (message.content.startsWith(`!conditions`)) { // Handle conditions descriptions
+    fetch(`${BASE_URL}/conditions/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      if(triggeredCommand === undefined) throw new Error(`No command was defined`);
+      // TODO See if you can change the format in such a way that discord doesn't indent the bullet points
+      message.channel.send(`**${data.name}**:\n    ${data.desc.join(`\n    `)}`)
+    })
+    .catch(err => {
+      console.error(err);
+
+      fetch(`${BASE_URL}/conditions`)
+      .then(res => res.json())
+      .then(data => {
+        message.channel.send(`**Valid conditions**:\n${data.results.map(e => e.index).join(`\n`)}`)
+      })
+    })
   }
 });
 

@@ -265,6 +265,22 @@ client.on(`messageCreate`, (message) => { // Message detector + response
         message.channel.send(`**Valid conditions**:\n${data.results.map(e => e.index).join(`\n`)}`)
       })
     })
+  } else if (message.content.startsWith(`!damage`)) { // Serve examples of damage types
+    fetch(`${BASE_URL}/damage-types/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      message.channel.send(`__Here's an example of something(s) that can cause *${data.name}* damage:__\n    ${data.desc[0]}`)
+    })
+    .catch(err => {
+      console.error(err);
+
+      fetch(`${BASE_URL}/damage-types`)
+      .then(res => res.json())
+      .then(data => {
+        message.channel.send(`__Valid Damage Types:__\n${data.results.map(e => e.index).join('\n')}`);
+      })
+      .catch(err => console.error(err))
+    })
   }
 });
 

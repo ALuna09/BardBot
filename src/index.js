@@ -281,6 +281,23 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       })
       .catch(err => console.error(err))
     })
+  } else if (message.content.startsWith(`!schools`)) { // Handle descriptions of magic schools
+    fetch(`${BASE_URL}/magic-schools/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      if(triggeredCommand === undefined) throw new Error('No school was defined');
+      message.channel.send(`__Magic School of **${data.name}**:__\n${data.desc}`);
+    })
+    .catch(err => {
+      console.error(err)
+
+      fetch(`${BASE_URL}/magic-schools`)
+      .then(res => res.json())
+      .then(data => {
+        message.channel.send(`__Valid Schools:__\n${data.results.map(e => e.index).join('\n')}`)
+      })
+      .catch(err => console.error(err))
+    })
   }
 });
 

@@ -298,6 +298,54 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       })
       .catch(err => console.error(err))
     })
+  } else if (message.content.startsWith(`!equipment`)) {
+    fetch(`${BASE_URL}/equipment/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      const {
+        armor_class,
+        armor_category,
+        cost,
+        desc, 
+        equipment_category,
+        gear_category,
+        name,
+        stealth_disadvantage,
+        str_minimum,
+        tool_category,
+        vehicle_category,
+        weight
+      } = data
+
+      // Tools
+      if (equipment_category.name === 'Tools') {
+        message.channel.send(
+          `*${name}* fall under the *${tool_category}* category, costing ${cost.quantity} ${cost.unit}.\n${desc.join('\n')}`
+        );
+
+        // Mounts
+      } else if (equipment_category.name === 'Mounts and Vehicles') {
+        message.channel.send(
+          `*${name}* fall under the *${vehicle_category}* category, costing ${cost.quantity} ${cost.unit}.\n${desc.join('\n')}`
+        );
+
+        // Armor
+      } else if (equipment_category.name === 'Armor') {
+        message.channel.send(
+          `***${name}:***
+**Class:** ${armor_category}
+**Dex mod:** ${armor_class.base > 0 ? `+${armor_class.base}`: armor_class.base} (Max: ${armor_class.max_bonus})
+**Str minimum:** ${str_minimum}
+**Stealth Disadvantage:** ${stealth_disadvantage ? '✅' : '❌'}
+**Weight:** ${weight}
+**Cost:** ${cost.quantity} ${cost.unit}
+`
+        )
+      }
+    })
+    .catch(err => {
+      
+    })
   }
 });
 

@@ -305,6 +305,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       const {
         armor_class,
         armor_category,
+        contents,
         cost,
         desc, 
         equipment_category,
@@ -320,13 +321,13 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       // Tools
       if (equipment_category.name === 'Tools') {
         message.channel.send(
-          `*${name}* fall under the *${tool_category}* category, costing ${cost.quantity} ${cost.unit}.\n${desc.join('\n')}`
+          `***${name}*** fall under the *${tool_category}* category, costing ${cost.quantity} ${cost.unit}.\n${desc.join('\n')}`
         );
 
         // Mounts
       } else if (equipment_category.name === 'Mounts and Vehicles') {
         message.channel.send(
-          `*${name}* fall under the *${vehicle_category}* category, costing ${cost.quantity} ${cost.unit}.\n${desc.join('\n')}`
+          `***${name}*** fall under the *${vehicle_category}* category, costing ${cost.quantity} ${cost.unit}.\n${desc.join('\n')}`
         );
 
         // Armor
@@ -337,14 +338,28 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 **Dex mod:** ${armor_class.base > 0 ? `+${armor_class.base}`: armor_class.base} (Max: ${armor_class.max_bonus})
 **Str minimum:** ${str_minimum}
 **Stealth Disadvantage:** ${stealth_disadvantage ? '✅' : '❌'}
-**Weight:** ${weight}
+**Weight:** ${weight} lb.
 **Cost:** ${cost.quantity} ${cost.unit}
 `
         )
+
+        // Equipment packs
+      } else if (equipment_category.name === 'Adventuring Gear' && gear_category.name === 'Equipment Packs') {
+        const mappedContents = contents.map(({item, quantity}) => `*${item.name}* - ${quantity}`);
+        message.channel.send(
+          `***${name}:***\n**Gear Type:** ${gear_category.name}\n**Cost:** ${cost.quantity} ${cost.unit}\n**Contains:**\n  ${mappedContents.join('\n  ')}`
+        )
+
+        // Standard gear
+      } else if (equipment_category.name === 'Adventuring Gear' && gear_category.name === 'Standard Gear') {
+        message.channel.send(`***${name}:***\n**Gear Type:** ${gear_category.name}\n**Cost:** ${cost.quantity} ${cost.unit}\n**Weight:** ${weight} lb.`);
       }
     })
     .catch(err => {
-      
+      console.error(err);
+
+      message.channel.send(`I couldn't find that piece of equipment, you may have to look at the Player's Handbook.`)
+      message.channel.send(`Be sure to write it in lowercase with dashes instead of spaces too!`)
     })
   }
 });

@@ -298,7 +298,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       })
       .catch(err => console.error(err))
     })
-  } else if (message.content.startsWith(`!equipment`)) {
+  } else if (message.content.startsWith(`!equipment`)) { // Handle equipment descriptions
     fetch(`${BASE_URL}/equipment/${triggeredCommand}`)
     .then(res => res.json())
     .then(data => {
@@ -358,8 +358,37 @@ client.on(`messageCreate`, (message) => { // Message detector + response
     .catch(err => {
       console.error(err);
 
-      message.channel.send(`I couldn't find that piece of equipment, you may have to look at the Player's Handbook.`)
-      message.channel.send(`Be sure to write it in lowercase with dashes instead of spaces too!`)
+      message.channel.send(`I couldn't find that piece of equipment.`);
+      message.channel.send(`Unfortunately, due to how many pieces of equipent, I can't list them all at this time.`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+    })
+  } else if (message.content.startsWith(`!magic-items`)) { // Handle magic item descriptions
+    fetch(`${BASE_URL}/magic-items/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      const {
+        equipment_category,
+        desc,
+        name,
+        rarity,
+        variant,
+        variants
+      } = data;
+
+      message.channel.send(`**${name}** is a __${rarity.name}__ *${equipment_category.name}*\n___Description:___`);
+      desc.forEach(e => message.channel.send(e));
+      
+      if (variants) {
+        let mappedVariants = variants.map(e => e.name);
+        message.channel.send(`__**${name}**__ itself is ${variant ? 'a variant' : '__**not**__ a variant'}\n*Varaiants include:*\n${mappedVariants.join('\n')}`);
+      };
+    })
+    .catch(err => {
+      console.error(err)
+
+      message.channel.send(`I couln't find that magic item.`);
+      message.channel.send(`Unfortunately, due to how many magic items, I can't list them all at this time.`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
     })
   }
 });

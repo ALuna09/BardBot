@@ -390,7 +390,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       message.channel.send(`Unfortunately, due to how many magic items, I can't list them all at this time.`);
       message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
     })
-  } else if (message.content.startsWith(`!weapon-prop`)) {
+  } else if (message.content.startsWith(`!weapon-prop`)) { // Handle descriptions of weapon properties
     fetch(`${BASE_URL}/weapon-properties/${triggeredCommand}`)
     .then(res => res.json())
     .then(data => {
@@ -404,6 +404,19 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       .then(data => {
         message.channel.send(`Here's a list of valid weapon properties:\n${data.results.map(e => e.index).join('\n')}`);
       })
+    })
+  } else if (message.content.startsWith(`!features`)) { // Handle descriptions of features
+    fetch(`${BASE_URL}/features/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      message.channel.send(`__**${data.name}:**__\n${data.desc.join('\n')}`);
+    })
+    .catch(err => {
+      console.error(err);
+
+      message.channel.send(`I couln't find that feature.`);
+      message.channel.send(`Unfortunately, due to how many features, I can't list them all at this time.`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
     })
   }
 });

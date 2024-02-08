@@ -380,7 +380,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       
       if (variants) {
         let mappedVariants = variants.map(e => e.name);
-        message.channel.send(`__**${name}**__ itself is ${variant ? 'a variant' : '__**not**__ a variant'}\n*Varaiants include:*\n${mappedVariants.join('\n')}`);
+        message.channel.send(`__**${name}**__ itself is ${variant ? 'a variant' : '__**not**__ a variant'}\n*Variants include:*\n${mappedVariants.join('\n')}`);
       };
     })
     .catch(err => {
@@ -389,6 +389,21 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       message.channel.send(`I couln't find that magic item.`);
       message.channel.send(`Unfortunately, due to how many magic items, I can't list them all at this time.`);
       message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+    })
+  } else if (message.content.startsWith(`!weapon-prop`)) {
+    fetch(`${BASE_URL}/weapon-properties/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      message.channel.send(`__**${data.name}:**__\n${data.desc.join('\n')}`);
+    })
+    .catch(err => {
+      console.error(err);
+
+      fetch(`${BASE_URL}/weapon-properties`)
+      .then(res => res.json())
+      .then(data => {
+        message.channel.send(`Here's a list of valid weapon properties:\n${data.results.map(e => e.index).join('\n')}`);
+      })
     })
   }
 });

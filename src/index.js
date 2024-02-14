@@ -418,6 +418,152 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       message.channel.send(`Unfortunately, due to how many features, I can't list them all at this time.`);
       message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
     })
+  } else if (message.content.startsWith(`!monsters`)) { // Handle monster descriptions
+    fetch(`${BASE_URL}/monsters/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      const {
+        // Properties being used ✅
+        name,
+        size,
+        type,
+        alignment,
+        armor_class,
+        hit_points,
+        hit_points_roll,
+        speed,
+        strength,
+        dexterity,
+        constitution,
+        intelligence,
+        wisdom,
+        charisma,
+        proficiencies,
+        senses,
+        languages,
+        challenge_rating,
+        xp,
+        // TODO: Get back to these properties at a later date
+        hit_dice,
+        damage_vulnerabilities,
+        damage_resistances,
+        damage_immunities,
+        condition_immunities,
+        proficiency_bonus,
+        special_abilities,
+        actions,
+        legendary_actions,
+        image
+      } = data;
+
+      const monsterSpeeds = (speedObj) => {
+        let speedStr = '\n  ';
+        for(let method in speedObj) {
+          speedStr += `__*${method}*__  (${speedObj[method]})\n  ` 
+        }
+        return speedStr;
+      }
+
+      const abilityModifier = (skillPoints) => { // Handles ability mods
+        switch(skillPoints) {
+          case 1:
+            return `-5`;
+          case 2:
+          case 3:
+            return `-4`;
+          case 4:
+          case 5:
+            return `-3`;
+          case 6:
+          case 7:
+            return `-2`;
+          case 8:
+          case 9:
+            return `-1`;
+          case 10:
+          case 11:
+            return `+0`;
+          case 12:
+          case 13:
+            return `+1`;
+          case 14:
+          case 15:
+            return `+2`;
+          case 16:
+          case 17:
+            return `+3`;
+          case 18:
+          case 19:
+            return `+4`;
+          case 20:
+          case 21:
+            return `+5`;
+          case 22:
+          case 23:
+            return `+6`;
+          case 24:
+          case 25:
+            return `+7`;
+          case 26:
+          case 27:
+            return `+8`;
+          case 28:
+          case 29:
+            return `+9`;
+          case 30:
+            return `+10`;
+          default:
+            return `Not a valid skill point`;
+        }
+      }
+
+      const monsterProficiencies = proficiencies.map(e => {
+        return {
+          name : e.proficiency.name,
+          value : e.value
+        }
+      })
+      
+      const listProficiencies = (proficienciesArr) => {
+        let proficienciesStr = '';
+        proficienciesArr.forEach(ele => {
+          proficienciesStr += `__*${ele.name}*__ (${ele.value})\n  `
+        })
+        return proficienciesStr;
+      }
+
+      const listSenses = (monsterSenses) => {
+        let sensesStr = '';
+        for (let sense in monsterSenses) {
+          sensesStr += `__*${sense}:*__ ${monsterSenses[sense]}\n  `
+        }
+        return sensesStr;
+      }
+
+      message.channel.send(`__***${name}:***__
+*${size} ${type}, ${alignment}*
+**Challenge Rating:** ${challenge_rating} (${xp} XP)
+**Armor Class:** ${armor_class[0].value} (${armor_class[0].type})
+**Hit Points:** ${hit_points} (${hit_points_roll})
+**Languages:** ${languages}
+**STR:** ${strength} (${abilityModifier(strength)})
+**DEX:** ${dexterity} (${abilityModifier(dexterity)})
+**CON:** ${constitution} (${abilityModifier(constitution)})
+**INT:** ${intelligence} (${abilityModifier(intelligence)})
+**WIS:** ${wisdom} (${abilityModifier(wisdom)})
+**CHA:** ${charisma} (${abilityModifier(charisma)})
+**Proficiencies:**\n  ${listProficiencies(monsterProficiencies)}
+**Speed:** ${monsterSpeeds(speed)}
+**Senses:**\n  ${listSenses(senses)}
+      `)
+    })
+    .catch(err => {
+      console.error(err);
+
+      message.channel.send(`I couln't find that monster.`);
+      message.channel.send(`Unfortunately, due to how many monsters, I can't list them all at this time.`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+    })
   }
 });
 

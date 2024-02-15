@@ -332,16 +332,14 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
         // Armor
       } else if (equipment_category.name === 'Armor') {
-        message.channel.send(
-          `***${name}:***
+        message.channel.send(`***${name}:***
 **Class:** ${armor_category}
 **Dex mod:** ${armor_class.base > 0 ? `+${armor_class.base}`: armor_class.base} (Max: ${armor_class.max_bonus})
 **Str minimum:** ${str_minimum}
 **Stealth Disadvantage:** ${stealth_disadvantage ? '✅' : '❌'}
 **Weight:** ${weight} lb.
 **Cost:** ${cost.quantity} ${cost.unit}
-`
-        )
+        `)
 
         // Equipment packs
       } else if (equipment_category.name === 'Adventuring Gear' && gear_category.name === 'Equipment Packs') {
@@ -444,16 +442,16 @@ client.on(`messageCreate`, (message) => { // Message detector + response
         challenge_rating,
         xp,
         // TODO: Get back to these properties at a later date
-        hit_dice,
-        damage_vulnerabilities,
-        damage_resistances,
-        damage_immunities,
-        condition_immunities,
-        proficiency_bonus,
-        special_abilities,
-        actions,
-        legendary_actions,
-        image
+        // hit_dice,
+        // damage_vulnerabilities,
+        // damage_resistances,
+        // damage_immunities,
+        // condition_immunities,
+        // proficiency_bonus,
+        // special_abilities,
+        // actions,
+        // legendary_actions,
+        // image
       } = data;
 
       const monsterSpeeds = (speedObj) => {
@@ -563,6 +561,59 @@ client.on(`messageCreate`, (message) => { // Message detector + response
       message.channel.send(`I couln't find that monster.`);
       message.channel.send(`Unfortunately, due to how many monsters, I can't list them all at this time.`);
       message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+    })
+  } else if (message.content.startsWith(`!races`)) { // Handle race descriptions
+    fetch(`${BASE_URL}/races/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      const {
+        name,
+        speed,
+        ability_bonuses,
+        age,
+        alignment,
+        size,
+        size_description,
+        language_desc,
+        traits,
+        subraces
+      } = data;
+
+      const listBonuses = (bonuses) => {
+        const mappedBonuses = bonuses.map(e => ({
+          skill: e.ability_score.name,
+          mod: e.bonus
+        }))
+        let bonusesStr = '';
+        
+        for(let abp of mappedBonuses) {
+          bonusesStr += `\n*${abp["skill"]}* (+${abp["mod"]})`
+          console.log(abp);
+        }
+
+        return bonusesStr;
+      };
+
+      message.channel.send(`***${name}:***
+__*Ability Score Increase:*__${listBonuses(ability_bonuses)}
+**Age:** ${age}
+**Alignment:** ${alignment}
+**Size:** ${size_description} Your size is ${size}
+**Speed:** Your base walking speed is ${speed} feet.
+**Languages:** ${language_desc}
+**Traits:**\n  ${traits.map(e => e.name).join('\n  ')}
+**Subraces:**\n  ${subraces.length === 0 ? 'None' : subraces.map(e => e.name).join('\n  ')}
+      `)
+    })
+    .catch(err => {
+      console.error(err);
+      
+      fetch(`${BASE_URL}/races`)
+      .then(res => res.json())
+      .then(data => {
+        message.channel.send(`Here's the valid races:\n${data.results.map(e => e.index).join('\n')}`)
+      })
+      .catch(err => console.error(err))
     })
   }
 });

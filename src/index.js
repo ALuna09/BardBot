@@ -635,7 +635,27 @@ __*Ability Score Increase:*__${listBonuses(ability_bonuses)}
       })
       .catch(err => console.error(err))
     })
+  } else if (message.content.startsWith(`!subrules`)) { // Handle subcategories of rules
+    fetch(`${BASE_URL}/rule-sections/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      if(triggeredCommand === undefined) throw new Error(`Something went wrong`);
+      const arrOfTextWall = data.desc.split('. ');
+      for (let text of arrOfTextWall) {
+        message.channel.send(text);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      fetch(`${BASE_URL}/rule-sections`)
+      .then(res => res.json())
+      .then(data => {
+        const mappedSubsections = data.results.map(e => e.index).join('\n  ');
+        message.channel.send(`Here are all the available subsections:\n  ${mappedSubsections}`);
+      })
+    })
   } 
+
 });
 
 client.login(process.env.BOT_TOKEN); // Bot login

@@ -358,7 +358,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       message.channel.send(`I couldn't find that piece of equipment.`);
       message.channel.send(`Unfortunately, due to how many pieces of equipent, I can't list them all at this time.`);
-      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes ___instead___ of spaces** too!`);
     })
   } else if (message.content.startsWith(`!magic-items`)) { // Handle magic item descriptions
     fetch(`${BASE_URL}/magic-items/${triggeredCommand}`)
@@ -386,7 +386,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       message.channel.send(`I couln't find that magic item.`);
       message.channel.send(`Unfortunately, due to how many magic items, I can't list them all at this time.`);
-      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes ___instead___ of spaces** too!`);
     })
   } else if (message.content.startsWith(`!weapon-prop`)) { // Handle descriptions of weapon properties
     fetch(`${BASE_URL}/weapon-properties/${triggeredCommand}`)
@@ -414,7 +414,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       message.channel.send(`I couln't find that feature.`);
       message.channel.send(`Unfortunately, due to how many features, I can't list them all at this time.`);
-      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes ___instead___ of spaces** too!`);
     })
   } else if (message.content.startsWith(`!monsters`)) { // Handle monster descriptions
     fetch(`${BASE_URL}/monsters/${triggeredCommand}`)
@@ -560,7 +560,7 @@ client.on(`messageCreate`, (message) => { // Message detector + response
 
       message.channel.send(`I couln't find that monster.`);
       message.channel.send(`Unfortunately, due to how many monsters, I can't list them all at this time.`);
-      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes _instead_ of spaces** too!`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes ___instead___ of spaces** too!`);
     })
   } else if (message.content.startsWith(`!races`)) { // Handle race descriptions
     fetch(`${BASE_URL}/races/${triggeredCommand}`)
@@ -654,7 +654,54 @@ __*Ability Score Increase:*__${listBonuses(ability_bonuses)}
         message.channel.send(`Here are all the available subsections:\n  ${mappedSubsections}`);
       })
     })
-  } 
+  } else if (message.content.startsWith(`!spells`)) { // Handle descriptions of spells
+    fetch(`${BASE_URL}/spells/${triggeredCommand}`)
+    .then(res => res.json())
+    .then(data => {
+      const {
+        name,
+        desc,
+        higher_level,
+        range,
+        components,
+        material,
+        area_of_effect,
+        ritual,
+        duration,
+        concentration,
+        casting_time,
+        school,
+        classes,
+      } = data;
+
+      if (triggeredCommand === undefined) throw new Error(`Something went wrong`);
+
+      message.channel.send(`## ${name}
+_${school.name}_ ${ritual ? '_(ritual)_' : ''}\n
+**Casting Time:** ${casting_time}
+**Range:** ${range} ${area_of_effect ? `(${area_of_effect.size}ft. radius ${area_of_effect.type})`: ''}
+**Components:** ${components.join(`, `)} (${material})
+**Duration:** ${concentration ? 'Concentration,' : ''} ${duration}
+**Description:**\n
+      `)
+
+      for (let section of desc) {
+        message.channel.send(`> ${section}`);
+      }
+
+      if(higher_level.length) message.channel.send(`**At Higher Levels:**\n  ${higher_level.join('\n  ')}`);
+
+      let mappedClasses = classes.map(e => e.name).join(`\n`);
+      message.channel.send(`**Classes capable of using this spell include:**\n*${mappedClasses}*`)
+    })
+    .catch(err => {
+      console.error(err);
+
+      message.channel.send(`I couln't find that spell.`);
+      message.channel.send(`Unfortunately, due to how many spells, I can't list them all at this time.`);
+      message.channel.send(`Check the player's handbook (or your spelling 👀) and be sure to write it in **lowercase with dashes ___instead___ of spaces** too!`);
+    })
+  }
 
 });
 
